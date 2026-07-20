@@ -119,7 +119,7 @@ let designPreviewUrls=[];
 function postRenderEnhancements(){
   if(current==='contributions')decorateContributionRows();
   if(current==='schedule')decorateMeetingTemplate();
-  if(current==='designs')loadDesignThumbnails();
+  if(current==='designs'){decorateDesignShareButtons();loadDesignThumbnails()}
 }
 function decorateContributionRows(){
   document.querySelectorAll('#view [data-edit="contribution"]').forEach(edit=>{
@@ -160,6 +160,25 @@ async function loadDesignThumbnails(){
     if(!imageFile)return;
     try{let response=await fetch(`${SUPABASE_URL}/storage/v1/object/authenticated/design-files/${storagePath(design.filePath)}`,{headers:{apikey:SUPABASE_KEY,Authorization:`Bearer ${cloudSession?.access_token||SUPABASE_KEY}`}});if(!response.ok)throw new Error('Preview unavailable');let blob=await response.blob(),url=URL.createObjectURL(blob);designPreviewUrls.push(url);let image=document.createElement('img');image.src=url;image.alt=`${design.category||'Design'} preview`;image.loading='lazy';thumb.replaceChildren(image);thumb.classList.add('has-image')}catch{thumb.title='Sign in to preview this design'}
   }));
+}
+function decorateDesignShareButtons(){
+  document.querySelectorAll('#view .design-card').forEach(card=>{
+    let edit=card.querySelector('[data-edit="design"]'),actions=card.querySelector('.actions'),design=state.designs.find(item=>item.id===edit?.dataset.id);
+    if(!design?.filePath||!actions||actions.querySelector('[data-share-design]'))return;
+    let button=document.createElement('button');button.type='button';button.className='button small ghost';button.dataset.shareDesign=design.id;button.textContent='Share';button.setAttribute('aria-label',`Share ${design.fileName||'design'}`);
+    button.onclick=()=>shareDesignFile(design.id,button);actions.insertBefore(button,actions.firstChild);
+  });
+}
+async function shareDesignFile(recordId,button){
+  let design=state.designs.find(item=>item.id===recordId);if(!design?.filePath){toast('No file has been uploaded for this design');return}
+  let originalText=button?.textContent;if(button){button.disabled=true;button.textContent='Preparing…'}
+  try{
+    let response=await fetch(`${SUPABASE_URL}/storage/v1/object/authenticated/design-files/${storagePath(design.filePath)}`,{headers:{apikey:SUPABASE_KEY,Authorization:`Bearer ${cloudSession?.access_token||SUPABASE_KEY}`}});if(!response.ok)throw new Error('Could not prepare this design for sharing');
+    let blob=await response.blob(),fileName=design.fileName||`illuminate-design.${(blob.type.split('/')[1]||'bin').replace('jpeg','jpg')}`,file=new File([blob],fileName,{type:design.fileType||blob.type||'application/octet-stream'}),title=design.memberId?memberName(design.memberId):(design.title||'Illuminate design');
+    if(navigator.share&&(!navigator.canShare||navigator.canShare({files:[file]}))){await navigator.share({title,text:`${title} · ${dateFmt(design.date)}`,files:[file]});toast('Design shared')}
+    else{let url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download=fileName;link.click();setTimeout(()=>URL.revokeObjectURL(url),1500);toast('Sharing is unavailable here, so the design was downloaded')}
+  }catch(error){if(error?.name!=='AbortError')toast(error?.message||'Could not share this design')}
+  finally{if(button){button.disabled=false;button.textContent=originalText}}
 }
 let initialPage=location.hash.slice(1);if(pages.some(page=>page[0]===initialPage))current=initialPage;
 render();initCloud();

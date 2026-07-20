@@ -1,4 +1,4 @@
-const CACHE='illuminate-dms-contribution-design-v2';
+const CACHE='illuminate-dms-ios-push-v3';
 const CORE=['./','./index.html','./styles.css','./app.js','./manifest.webmanifest','./public/favicon.svg'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(CORE)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));

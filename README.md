@@ -41,6 +41,8 @@ For a closed department workspace, disable public sign-ups in Supabase after all
 
 Notification subscriptions are per browser/device. On iPhone or iPad, install the PWA from Safari before enabling notifications.
 
+If an iPhone previously displayed “the string did not match the expected pattern,” publish the latest app files, remove the old Home Screen copy, open the GitHub Pages site in Safari, and use **Add to Home Screen** again. Web Push requires iOS/iPadOS 16.4 or later.
+
 The top-bar notification bell opens the in-app Notification Center. It lists upcoming birthdays, activities, contribution deadlines, and design post dates. Read status is kept on each device. The app remains installable from the browser's normal **Install app** or **Add to Home Screen** command; no installation button is shown in the app navigation.
 
 ## Enable shared design-file storage

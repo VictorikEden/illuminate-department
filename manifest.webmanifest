@@ -2,6 +2,7 @@
   "name": "Illuminate Department Management System",
   "short_name": "Illuminate DMS",
   "description": "Department management for Illuminate, David's Christian Center.",
+  "id": "./",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

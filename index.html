@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#172A46" />
+  <meta name="description" content="Illuminate Department Management System for David's Christian Center" />
+  <meta property="og:title" content="Illuminate Department Management System" />
+  <meta property="og:description" content="Members, contributions, activities, schedules, rosters, designs and reports — organized in one private browser-based workspace." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="public/og.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <title>Illuminate Department Management System</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand"><div class="brand-mark">IL</div><div><strong>Illuminate</strong><span>Department Management</span></div></div>
+      <nav id="nav" aria-label="Main navigation"></nav>
+      <button class="install-button" id="installButton"><span>⇩</span><span><strong>Install app</strong><small>Add to this device</small></span></button>
+      <div class="sidebar-foot"><span class="status-dot"></span><div><strong>Saved on this device</strong><small id="lastSaved">Ready</small></div></div>
+    </aside>
+    <main class="main">
+      <header class="topbar">
+        <button class="icon-button menu-button" id="menuButton" aria-label="Open menu">☰</button>
+        <div><p class="eyebrow">DAVID'S CHRISTIAN CENTER</p><h1 id="pageTitle">Dashboard</h1></div>
+        <div class="top-actions">
+          <button class="button ghost" id="backupButton">↓ Backup</button>
+          <label class="button ghost file-label">↑ Restore<input id="restoreInput" type="file" accept="application/json" /></label>
+          <button class="avatar" id="accountButton" title="Account">IA</button>
+        </div>
+      </header>
+      <div id="view" class="view" aria-live="polite"></div>
+    </main>
+  </div>
+  <div class="scrim" id="scrim"></div>
+  <dialog id="authDialog" class="auth-dialog">
+    <form id="authForm">
+      <div class="auth-brand"><div class="brand-mark">IL</div><div><p class="eyebrow">DAVID'S CHRISTIAN CENTER</p><h2>Illuminate DMS</h2></div></div>
+      <h3 id="authTitle">Sign in to continue</h3>
+      <p id="authIntro">Use your department leader account to access the shared workspace.</p>
+      <div class="field"><label>Email address</label><input id="authEmail" type="email" autocomplete="email" required /></div>
+      <div class="field"><label>Password</label><input id="authPassword" type="password" autocomplete="current-password" minlength="6" required /></div>
+      <p id="authError" class="auth-error"></p>
+      <button class="button primary auth-submit" id="authSubmit" type="submit">Sign in</button>
+      <button class="auth-switch" id="authSwitch" type="button">Need an account? Create one</button>
+    </form>
+  </dialog>
+  <dialog id="accountDialog" class="account-dialog"><div class="modal-head"><div><p class="eyebrow">SIGNED IN</p><h2 id="accountEmail">Department leader</h2></div><button class="icon-button" id="accountClose" aria-label="Close">×</button></div><div class="modal-body"><p class="cloud-status" id="cloudStatus">Checking shared workspace…</p><button class="button danger" id="signOutButton">Sign out</button></div></dialog>
+  <dialog id="modal"><form method="dialog" id="modalForm"><div class="modal-head"><div><p class="eyebrow" id="modalEyebrow">NEW RECORD</p><h2 id="modalTitle">Add record</h2></div><button class="icon-button" value="cancel" aria-label="Close">×</button></div><div id="modalBody" class="modal-body"></div><div class="modal-actions"><button class="button ghost" value="cancel">Cancel</button><button class="button primary" id="modalSave" value="default">Save record</button></div></form></dialog>
+  <div id="toast" class="toast" role="status"></div>
+  <script src="app.js"></script>
+</body>
+</html>

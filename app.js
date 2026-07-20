@@ -21,7 +21,7 @@ document.getElementById('nav').onclick=e=>{let b=e.target.closest('[data-page]')
 document.getElementById('menuButton').onclick=()=>{document.getElementById('sidebar').classList.add('open');document.getElementById('scrim').classList.add('show')};
 document.getElementById('scrim').onclick=closeMenu;function closeMenu(){document.getElementById('sidebar').classList.remove('open');document.getElementById('scrim').classList.remove('show')}
 document.getElementById('backupButton').onclick=backup;document.getElementById('restoreInput').onchange=restore;
-function render(){document.querySelectorAll('.nav-button').forEach(b=>b.classList.toggle('active',b.dataset.page===current));document.getElementById('pageTitle').textContent=current==='notifications'?'Notifications':pages.find(p=>p[0]===current)[2];document.getElementById('view').innerHTML=views[current]();bindView();updateNotificationBadge()}
+function render(){document.querySelectorAll('.nav-button').forEach(b=>b.classList.toggle('active',b.dataset.page===current));document.getElementById('pageTitle').textContent=current==='notifications'?'Notifications':pages.find(p=>p[0]===current)[2];document.getElementById('view').innerHTML=views[current]();bindView();updateNotificationBadge();postRenderEnhancements()}
 const metrics=()=>{let active=state.members.filter(m=>m.status==='Active').length,inactive=state.members.length-active,pending=state.designs.filter(d=>designStatus(d)!=='Past').length,training=state.activities.filter(a=>a.type==='Training'&&a.status!=='Completed').length;return {active,inactive,pending,training}};
 const views={
 dashboard(){let m=metrics(),upcoming=[...state.members].map(x=>({...x,next:nextBirthday(x.birthday)})).sort((a,b)=>a.next-b.next).slice(0,4);return `<section class="hero"><div><p class="eyebrow">WELCOME BACK</p><h2>Serving with clarity and excellence.</h2><p>Your department at a glance — everything updates as your records change.</p></div><div class="hero-date"><strong>${new Date().toLocaleDateString('en-NG',{weekday:'long'})}</strong><span>${new Date().toLocaleDateString('en-NG',{day:'numeric',month:'long',year:'numeric'})}</span></div></section><section class="metrics">${metric('Total members',state.members.length,'Department directory')}${metric('Active members',m.active,'Currently serving')}${metric('Inactive',m.inactive,'Away or unavailable')}${metric('Contributions',state.contributionTypes.filter(x=>x.status==='Active').length,'Active collections')}${metric('Pending designs',m.pending,'Needs attention')}${metric('Trainings',m.training,'Upcoming sessions')}</section><section class="grid-2"><div class="card"><div class="card-head"><div><h3>Upcoming celebrations</h3><p>Birthdays coming up next</p></div><button class="button small ghost right" data-page-jump="members">View members</button></div><div class="card-body list">${upcoming.map(x=>`<div class="list-item"><div class="date-tile"><b>${x.next.toLocaleDateString('en-NG',{month:'short'}).toUpperCase()}</b><strong>${x.next.getDate()}</strong></div><div class="grow"><strong>${esc(x.name)}</strong><small>${esc(x.subunit)} · Birthday</small></div><span class="pill active">${daysUntil(x.next)} days</span></div>`).join('')||empty('No birthdays recorded')}</div></div><div class="card"><div class="card-head"><div><h3>Quick actions</h3><p>Keep your records moving</p></div></div><div class="card-body quick-actions"><button class="quick-action" data-add="member"><span>＋ Add member</span><small>Grow the directory</small></button><button class="quick-action" data-add="activity"><span>＋ Plan activity</span><small>Meeting or training</small></button><button class="quick-action" data-add="design"><span>＋ Add design</span><small>Track creative work</small></button></div></div></section><section class="grid-2 grid-even" style="margin-top:18px"><div class="card"><div class="card-head"><div><h3>Next activities</h3><p>Department calendar</p></div></div><div class="card-body list">${state.activities.slice().sort((a,b)=>a.date.localeCompare(b.date)).slice(0,4).map(a=>`<div class="list-item"><div class="date-tile"><b>${dateFmt(a.date,{month:'short'}).toUpperCase()}</b><strong>${new Date(a.date+'T00:00:00').getDate()}</strong></div><div class="grow"><strong>${esc(a.title)}</strong><small>${esc(a.venue)} · ${esc(a.time)}</small></div><span class="pill ${a.status.toLowerCase().replace(' ','-')}">${esc(a.status)}</span></div>`).join('')||empty('No activities yet')}</div></div>${skillsCard()}</section>`},
@@ -115,5 +115,51 @@ document.getElementById('view').addEventListener('click',event=>{let downloadBut
 let installPrompt=null;window.addEventListener('beforeinstallprompt',event=>{event.preventDefault();installPrompt=event});
 window.addEventListener('appinstalled',()=>toast('Illuminate DMS installed'));
 if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js').catch(()=>{}));
+let designPreviewUrls=[];
+function postRenderEnhancements(){
+  if(current==='contributions')decorateContributionRows();
+  if(current==='schedule')decorateMeetingTemplate();
+  if(current==='designs')loadDesignThumbnails();
+}
+function decorateContributionRows(){
+  document.querySelectorAll('#view [data-edit="contribution"]').forEach(edit=>{
+    let cell=edit.closest('tr')?.cells?.[0];
+    if(!cell||cell.querySelector('[data-view-contribution]'))return;
+    let button=document.createElement('button');
+    button.type='button';button.className='contribution-link';button.dataset.viewContribution=edit.dataset.id;
+    button.title='View members who contributed';button.innerHTML=cell.innerHTML;cell.replaceChildren(button);
+    button.onclick=()=>openContributionDetails(edit.dataset.id);
+  });
+}
+function openContributionDetails(id){
+  let contribution=state.contributionTypes.find(item=>item.id===id),dialog=document.getElementById('contributionDialog'),body=document.getElementById('contributionDetailBody');
+  if(!contribution||!dialog||!body)return;
+  let grouped={};
+  state.payments.filter(payment=>payment.typeId===id).forEach(payment=>{let key=payment.memberId||'unknown';if(!grouped[key])grouped[key]={amount:0,dates:[]};grouped[key].amount+=Number(payment.amount||0);if(payment.date)grouped[key].dates.push(payment.date)});
+  let contributors=Object.entries(grouped).map(([memberId,value])=>({memberId,...value})).filter(item=>item.amount>0).sort((a,b)=>memberName(a.memberId).localeCompare(memberName(b.memberId)));
+  let received=contributors.reduce((sum,item)=>sum+item.amount,0),perMember=Number(contribution.amount||0);
+  document.getElementById('contributionDetailTitle').textContent=contribution.name;
+  document.getElementById('contributionDetailSummary').textContent=`${contributors.length} member${contributors.length===1?'':'s'} contributed · ${money(received)} received`;
+  body.innerHTML=contributors.length?`<div class="table-wrap"><table class="data-table contributor-table"><thead><tr><th>Member</th><th>Amount contributed</th><th>Balance</th><th>Latest payment</th></tr></thead><tbody>${contributors.map(item=>`<tr><td><strong>${esc(memberName(item.memberId))}</strong></td><td>${money(item.amount)}</td><td>${money(Math.max(0,perMember-item.amount))}</td><td>${dateFmt(item.dates.sort().at(-1)||'')}</td></tr>`).join('')}</tbody></table></div>`:empty('No member has contributed yet');
+  if(!dialog.open)dialog.showModal();
+}
+function decorateMeetingTemplate(){
+  let template=document.querySelector('#view .editable-template[data-template="schedule"]'),wrap=template?.querySelector('.table-wrap');
+  if(!wrap||template.querySelector('[data-add-agenda-row]'))return;
+  let button=document.createElement('button');button.type='button';button.className='button ghost add-agenda-row';button.dataset.addAgendaRow='';button.textContent='＋ Add activity line';
+  button.onclick=()=>{let body=template.querySelector('tbody'),row=document.createElement('tr'),index=body.rows.length;row.innerHTML=Array.from({length:6},(_,cell)=>`<td contenteditable="true" data-cell="${index},${cell}"></td>`).join('');body.appendChild(row);row.cells[0].focus();};
+  wrap.insertAdjacentElement('afterend',button);
+}
+async function loadDesignThumbnails(){
+  designPreviewUrls.forEach(url=>URL.revokeObjectURL(url));designPreviewUrls=[];
+  let cards=[...document.querySelectorAll('#view .design-card')];
+  await Promise.all(cards.map(async card=>{
+    let id=card.querySelector('[data-edit="design"]')?.dataset.id,design=state.designs.find(item=>item.id===id),thumb=card.querySelector('.design-thumb');
+    if(!design?.filePath||!thumb)return;
+    let imageFile=(design.fileType||'').startsWith('image/')||/\.(png|jpe?g|webp|gif)$/i.test(design.fileName||'');
+    if(!imageFile)return;
+    try{let response=await fetch(`${SUPABASE_URL}/storage/v1/object/authenticated/design-files/${storagePath(design.filePath)}`,{headers:{apikey:SUPABASE_KEY,Authorization:`Bearer ${cloudSession?.access_token||SUPABASE_KEY}`}});if(!response.ok)throw new Error('Preview unavailable');let blob=await response.blob(),url=URL.createObjectURL(blob);designPreviewUrls.push(url);let image=document.createElement('img');image.src=url;image.alt=`${design.category||'Design'} preview`;image.loading='lazy';thumb.replaceChildren(image);thumb.classList.add('has-image')}catch{thumb.title='Sign in to preview this design'}
+  }));
+}
 let initialPage=location.hash.slice(1);if(pages.some(page=>page[0]===initialPage))current=initialPage;
 render();initCloud();

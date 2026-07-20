@@ -41,6 +41,14 @@ For a closed department workspace, disable public sign-ups in Supabase after all
 
 Notification subscriptions are per browser/device. On iPhone or iPad, install the PWA from Safari before enabling notifications.
 
+The top-bar notification bell opens the in-app Notification Center. It lists upcoming birthdays, activities, contribution deadlines, and design post dates. Read status is kept on each device. The app remains installable from the browser's normal **Install app** or **Add to Home Screen** command; no installation button is shown in the app navigation.
+
+## Enable shared design-file storage
+
+Run the latest `supabase-schema.sql` again in the SQL Editor. It creates a private `design-files` Storage bucket and policies that permit authenticated department leaders to upload, download, replace, and delete files. Existing database records are preserved.
+
+Design files are private: downloading requires a signed-in Supabase session. The bucket accepts files up to 50 MB. The Designs page stores the file path, original filename, content type, and size alongside the existing design record.
+
 ## Data and exports
 
 - Browser persistence uses local storage.

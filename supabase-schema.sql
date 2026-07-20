@@ -96,3 +96,23 @@ create table if not exists public.notification_log (
 
 alter table public.notification_log enable row level security;
 revoke all on public.notification_log from anon, authenticated;
+
+-- Private shared storage for birthday, anniversary, and other design files.
+insert into storage.buckets (id, name, public, file_size_limit)
+values ('design-files', 'design-files', false, 52428800)
+on conflict (id) do update set public = false, file_size_limit = 52428800;
+
+drop policy if exists "Leaders download design files" on storage.objects;
+drop policy if exists "Leaders upload design files" on storage.objects;
+drop policy if exists "Leaders replace design files" on storage.objects;
+drop policy if exists "Leaders delete design files" on storage.objects;
+
+create policy "Leaders download design files" on storage.objects
+for select to authenticated using (bucket_id = 'design-files');
+create policy "Leaders upload design files" on storage.objects
+for insert to authenticated with check (bucket_id = 'design-files');
+create policy "Leaders replace design files" on storage.objects
+for update to authenticated using (bucket_id = 'design-files')
+with check (bucket_id = 'design-files');
+create policy "Leaders delete design files" on storage.objects
+for delete to authenticated using (bucket_id = 'design-files');

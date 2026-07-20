@@ -19,7 +19,6 @@
     <aside class="sidebar" id="sidebar">
       <div class="brand"><div class="brand-mark">IL</div><div><strong>Illuminate</strong><span>Department Management</span></div></div>
       <nav id="nav" aria-label="Main navigation"></nav>
-      <button class="install-button" id="installButton"><span>⇩</span><span><strong>Install app</strong><small>Add to this device</small></span></button>
       <div class="sidebar-foot"><span class="status-dot"></span><div><strong>Saved on this device</strong><small id="lastSaved">Ready</small></div></div>
     </aside>
     <main class="main">
@@ -29,6 +28,7 @@
         <div class="top-actions">
           <button class="button ghost" id="backupButton">↓ Backup</button>
           <label class="button ghost file-label">↑ Restore<input id="restoreInput" type="file" accept="application/json" /></label>
+          <button class="notification-bell" id="notificationBell" aria-label="Open notifications" title="Notifications">♢<span id="notificationCount">0</span></button>
           <button class="avatar" id="accountButton" title="Account">IA</button>
         </div>
       </header>

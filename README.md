@@ -26,6 +26,21 @@ The first authenticated session automatically uploads the existing LocalStorage 
 
 For a closed department workspace, disable public sign-ups in Supabase after all leaders have registered, or invite/manage users from the Supabase dashboard.
 
+## Enable device push notifications
+
+1. Run the updated `supabase-schema.sql` again in the Supabase SQL Editor. It safely adds the notification tables without removing existing data.
+2. In **Edge Functions**, create a function named `send-reminders` and use `supabase/functions/send-reminders/index.ts` as its source. Disable JWT verification for this function because it is protected by the separate `CRON_SECRET` header.
+3. Add the three values from the separately delivered `SUPABASE_NOTIFICATION_SECRETS.txt` file under **Edge Functions → Secrets**. Never upload that secrets file to GitHub.
+4. Deploy the function.
+5. Under **Integrations → Cron**, create an hourly HTTP job:
+   - Method: `POST`
+   - URL: `https://kfeiwfvmvppepehywcgw.supabase.co/functions/v1/send-reminders`
+   - Header: `x-cron-secret` with the supplied `CRON_SECRET` value
+   - Body: `{}`
+6. Publish the updated GitHub Pages files. Each leader can then open their account menu and choose **Enable** under Device notifications.
+
+Notification subscriptions are per browser/device. On iPhone or iPad, install the PWA from Safari before enabling notifications.
+
 ## Data and exports
 
 - Browser persistence uses local storage.

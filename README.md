@@ -45,6 +45,8 @@ If an iPhone previously displayed “the string did not match the expected patte
 
 The top-bar notification bell opens the in-app Notification Center. It lists upcoming birthdays, activities, contribution deadlines, and design post dates. Read status is kept on each device. The app remains installable from the browser's normal **Install app** or **Add to Home Screen** command; no installation button is shown in the app navigation.
 
+Member records also track The Journey level (0–4), Prayer School completion, DCC join date, marital status, occupation, and the HOD/AHOD sub-units. The Journey, Prayer School, and marital-status totals appear on the dashboard and in the printable Dashboard Report.
+
 ## Enable shared design-file storage
 
 Run the latest `supabase-schema.sql` again in the SQL Editor. It creates a private `design-files` Storage bucket and policies that permit authenticated department leaders to upload, download, replace, and delete files. Existing database records are preserved.

@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#172A46" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#6423C7" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="Illuminate DMS" />
@@ -14,14 +14,20 @@
   <meta property="og:image" content="public/og.png" />
   <meta name="twitter:card" content="summary_large_image" />
   <link rel="manifest" href="manifest.webmanifest" />
-  <link rel="apple-touch-icon" href="public/og.png" />
+  <link rel="icon" href="public/dcc-logo.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="public/dcc-logo.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&amp;display=swap" rel="stylesheet" />
   <title>Illuminate Department Management System</title>
   <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="purple-theme.css" />
+  <link rel="stylesheet" href="mobile.css" />
 </head>
 <body>
   <div class="app-shell">
     <aside class="sidebar" id="sidebar">
-      <div class="brand"><div class="brand-mark">IL</div><div><strong>Illuminate</strong><span>Department Management</span></div></div>
+      <div class="brand"><div class="brand-mark"><img src="public/dcc-logo.svg" alt="David's Christian Center logo" /></div><div><strong>Illuminate</strong><span>Department Management</span></div></div>
       <nav id="nav" aria-label="Main navigation"></nav>
       <div class="sidebar-foot"><span class="status-dot"></span><div><strong>Saved on this device</strong><small id="lastSaved">Ready</small></div></div>
     </aside>
@@ -30,8 +36,8 @@
         <button class="icon-button menu-button" id="menuButton" aria-label="Open menu">☰</button>
         <div><p class="eyebrow">DAVID'S CHRISTIAN CENTER</p><h1 id="pageTitle">Dashboard</h1></div>
         <div class="top-actions">
-          <button class="button ghost" id="backupButton">↓ Backup</button>
-          <label class="button ghost file-label">↑ Restore<input id="restoreInput" type="file" accept="application/json" /></label>
+          <div class="header-search-wrap"><input id="globalSearch" class="header-search" type="search" placeholder="Search a member…" autocomplete="off" aria-label="Search members and records" /><div id="globalSearchResults" class="header-popover search-results" hidden></div></div>
+          <div class="header-menu-wrap"><button class="button primary" id="quickAddButton" aria-haspopup="menu" aria-expanded="false">＋ Add</button><div class="header-popover quick-add-menu" id="quickAddMenu" role="menu" hidden><button data-quick-add="weekly">Weekly Action</button><button data-quick-add="member">Member</button><button data-quick-add="activity">Activity</button><button data-quick-add="contribution">Contribution</button><button data-quick-add="design">Design</button><button data-quick-add="attendance">Attendance</button></div></div>
           <button class="notification-bell" id="notificationBell" aria-label="Open notifications" title="Notifications">♢<span id="notificationCount">0</span></button>
           <button class="avatar" id="accountButton" title="Account">IA</button>
         </div>
@@ -42,7 +48,7 @@
   <div class="scrim" id="scrim"></div>
   <dialog id="authDialog" class="auth-dialog">
     <form id="authForm">
-      <div class="auth-brand"><div class="brand-mark">IL</div><div><p class="eyebrow">DAVID'S CHRISTIAN CENTER</p><h2>Illuminate DMS</h2></div></div>
+      <div class="auth-brand"><div class="brand-mark"><img src="public/dcc-logo.svg" alt="David's Christian Center logo" /></div><div><p class="eyebrow">DAVID'S CHRISTIAN CENTER</p><h2>Illuminate DMS</h2></div></div>
       <h3 id="authTitle">Sign in to continue</h3>
       <p id="authIntro">Use your department leader account to access the shared workspace.</p>
       <div class="field"><label>Email address</label><input id="authEmail" type="email" autocomplete="email" required /></div>
@@ -54,7 +60,12 @@
   </dialog>
   <dialog id="accountDialog" class="account-dialog"><div class="modal-head"><div><p class="eyebrow">SIGNED IN</p><h2 id="accountEmail">Department leader</h2></div><button class="icon-button" id="accountClose" aria-label="Close">×</button></div><div class="modal-body"><p class="cloud-status" id="cloudStatus">Checking shared workspace…</p><div class="notification-setting"><div><strong>Device notifications</strong><small id="notificationStatus">Not enabled on this device</small></div><button class="button gold" id="notificationButton">Enable</button></div><p class="notification-help">Reminders include birthdays, upcoming activities, contribution deadlines, and designs approaching their post date.</p><button class="button danger" id="signOutButton">Sign out</button></div></dialog>
   <dialog id="modal"><form method="dialog" id="modalForm"><div class="modal-head"><div><p class="eyebrow" id="modalEyebrow">NEW RECORD</p><h2 id="modalTitle">Add record</h2></div><button class="icon-button" type="button" onclick="document.getElementById('modal').close()" aria-label="Close">×</button></div><div id="modalBody" class="modal-body"></div><div class="modal-actions"><button class="button ghost" type="button" onclick="document.getElementById('modal').close()">Cancel</button><button class="button primary" id="modalSave" value="default">Save record</button></div></form></dialog>
-  <dialog id="contributionDialog" class="contribution-dialog"><div class="modal-head"><div><p class="eyebrow">CONTRIBUTION DETAILS</p><h2 id="contributionDetailTitle">Contribution</h2><p id="contributionDetailSummary" class="dialog-summary"></p></div><button class="icon-button" id="contributionDetailClose" aria-label="Close">×</button></div><div id="contributionDetailBody" class="modal-body"></div></dialog>  <div id="toast" class="toast" role="status"></div>
+  <dialog id="contributionDialog" class="contribution-dialog"><div class="modal-head"><div><p class="eyebrow">CONTRIBUTION DETAILS</p><h2 id="contributionDetailTitle">Contribution</h2><p id="contributionDetailSummary" class="dialog-summary"></p></div><button class="icon-button" id="contributionDetailClose" aria-label="Close">×</button></div><div id="contributionDetailBody" class="modal-body"></div></dialog>
+  <dialog id="attendanceDialog" class="attendance-dialog"><div class="modal-head"><div><p class="eyebrow">ACTIVITY ATTENDANCE</p><h2 id="attendanceTitle">Take attendance</h2><p id="attendanceSummary" class="dialog-summary"></p></div><button class="icon-button" id="attendanceClose" aria-label="Close">×</button></div><div id="attendanceBody" class="modal-body"></div><div class="modal-actions"><button class="button ghost" id="attendanceCancel">Cancel</button><button class="button primary" id="attendanceSave">Save attendance</button></div></dialog>
+  <dialog id="detailDialog" class="detail-dialog"><div class="modal-head"><div><p class="eyebrow" id="detailEyebrow">DETAILS</p><h2 id="detailTitle">Details</h2></div><button class="icon-button" id="detailClose" aria-label="Close">×</button></div><div id="detailBody" class="modal-body"></div></dialog>
+  <dialog id="weeklyDialog" class="weekly-dialog"><form id="weeklyForm"><div class="modal-head"><div><p class="eyebrow" id="weeklyEyebrow">WEEKLY ACTION</p><h2 id="weeklyTitle">Add weekly action</h2></div><button class="icon-button" type="button" id="weeklyClose" aria-label="Close">×</button></div><div class="modal-body"><div class="form-grid"><div class="field"><label>Type</label><select name="type" id="weeklyType"><option>House Reminder</option><option>Reach-out</option><option>Update</option><option>Schedule Preparation</option><option>General Task</option></select></div><div class="field"><label>Action / title</label><input name="title" required></div><div class="field"><label>Due date</label><input name="dueDate" type="date" required></div><div class="field"><label>Due time</label><input name="dueTime" type="time"></div><div class="field"><label>Responsible admin</label><select name="responsibleId" id="weeklyResponsible"></select></div><div class="field"><label>Status</label><select name="status" id="weeklyStatus"></select></div><div class="field full"><label>Related activity (optional)</label><select name="relatedActivityId" id="weeklyRelatedActivity"><option value="">None</option></select></div><div class="field weekly-linked-field"><label>Linked section</label><select name="linkedModule"><option value="">None</option><option value="members">Members</option><option value="contributions">Contributions</option><option value="activities">Calendar</option><option value="schedule">Schedule & Roster</option><option value="designs">Designs</option><option value="reports">Reports</option></select></div><div class="field weekly-person-field" hidden><label>Person</label><input name="person"></div><div class="field full weekly-message-field"><label>Message</label><textarea name="message"></textarea></div><div class="field full weekly-reason-field" hidden><label>Reason</label><textarea name="reason"></textarea></div><div class="field weekly-outcome-field" hidden><label>Outcome</label><select name="outcome"><option value="">Not recorded</option><option>Reached</option><option>No Response</option><option>Call Back</option><option>Follow-up Required</option></select></div><div class="field full weekly-notes-field"><label>Notes</label><textarea name="notes"></textarea></div><label class="weekly-recurring full"><input name="recurring" type="checkbox"> Repeat this action every week</label></div></div><div class="modal-actions"><button class="button ghost" type="button" id="weeklyCancel">Cancel</button><button class="button primary" type="submit">Save action</button></div></form></dialog>
+  <div id="toast" class="toast" role="status"></div>
+  <script src="visual-icons.js"></script>
   <script src="app.js"></script>
   <script>document.getElementById("contributionDetailClose").onclick=()=>document.getElementById("contributionDialog").close()</script>
 </body>
